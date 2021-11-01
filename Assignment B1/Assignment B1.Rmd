@@ -1,0 +1,55 @@
+---
+title: "Assignment B1"
+author: "Christina"
+date: "10/31/2021"
+output: github_document
+---
+
+```{r}
+suppressPackageStartupMessages(library(datateachr)) 
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(testthat))
+```
+
+Exercise 1: Make a function
+** Make a function that takes in a vector of temperature numbers and convert it to another temperature unit. There are three options for the input unit and output unit: Fahrenheit, Celsius and Kelvin.
+```{r}
+temperature_conversion <- function(input_unit, output_unit, input_temp) {
+  if (!((input_unit == "C") | (input_unit == "Celsius") | (input_unit == "K") | (input_unit == "Kelvin") | (input_unit == "F") | (input_unit == "Fahrenheit"))) {
+    stop("Input unit invalid, must be one of Fahrenheit, Celsius, Kelvin or F, C, K")
+  }
+  if (!((output_unit == "C") | (output_unit == "Celsius") | (output_unit == "K") | (output_unit == "Kelvin") | (output_unit == "F") | (output_unit == "Fahrenheit"))) {
+    stop("Output unit invalid, must be one of Fahrenheit, Celsius, Kelvin or F, C, K")
+  }
+  
+  output_temp = case_when((input_unit == "C" | input_unit == "Celsius") & (output_unit == "K" | (output_unit == "Kelvin")) ~ input_temp + 273.15,
+                          (input_unit == "K" | input_unit == "Kelvin") & (output_unit == "C" | (output_unit == "Celsius")) ~ input_temp - 273.15,
+                          (input_unit == "F" | input_unit == "Fahrenheit") & (output_unit == "C" | (output_unit == "Celsius")) ~ (input_temp - 32) * 5 / 9,
+                          (input_unit == "C" | input_unit == "Celsius") & (output_unit == "F" | (output_unit == "Fahrenheit")) ~ (input_temp * 9 / 5) + 32,
+                          (input_unit == "F" | input_unit == "Fahrenheit") & (output_unit == "K" | (output_unit == "Kelvin")) ~ (input_temp - 32) * 5 / 9 + 273.15,
+                          (input_unit == "K" | input_unit == "Kelvin") & (output_unit == "F" | (output_unit == "Fahrenheit")) ~ ((input_temp - 273.15) * 9 / 5) + 32,
+                          TRUE ~ Inf)
+  return (output_temp)
+}
+``` 
+
+Exercise 4: Testing
+```{r}
+test_that("Different input vector types", {
+  expect_equal(temperature_conversion("Celsius", "Kelvin", 100), 373.15 , tolerance = 1e-4)
+  expect_equal(temperature_conversion("Kelvin", "Celsius", 273.15), 0, tolerance = 1e-4)
+  expect_equal(temperature_conversion("F", "C", 50), 10, tolerance = 1e-4)
+  expect_equal(temperature_conversion("F", "Kelvin", 10), 260.928, tolerance = 1e-4)
+  expect_equal(temperature_conversion("Kelvin", "F", 10), -441.67, tolerance = 1e-4)
+})
+
+test_that("NA input vectors", {
+  expect_equal(temperature_conversion("Kelvin", "F", NA), NA)
+})
+
+test_that("Invalid Input vectors", {
+  expect_error(temperature_conversion("Kelvin", "Cels", 10))
+})
+
+```
+
