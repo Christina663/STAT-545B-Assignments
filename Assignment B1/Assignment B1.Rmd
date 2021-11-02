@@ -11,9 +11,35 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(testthat))
 ```
 
-Exercise 1: Make a function
-** Make a function that takes in a vector of temperature numbers and convert it to another temperature unit. There are three options for the input unit and output unit: Fahrenheit, Celsius and Kelvin.
+Before starting, let's make some simple tribbles of temperature data for our later examples:
 ```{r}
+tempC <- tribble(
+  ~x, ~Celsius, 
+  "a", 20, 
+  "b", 17,
+  "c", 25,
+)
+
+tempCF <- tribble(
+  ~x, ~Celsius, ~Fahrenheit,
+  "a", 20, 68,
+  "b", 17, 62.6,
+  "c", 25, 77,
+)
+```
+
+
+Exercise 1 and 2: Make a function and write documentations
+** Make a function that takes in a vector of temperature numbers and convert it to another temperature unit. There are three options for the input unit and output unit: Fahrenheit, Celsius and Kelvin.
+
+ 
+```{r}
+#' Convert a numerical representation of temperature between three units: Fahrenheit, Celsius and Kelvin.
+#' 
+#' @param input_unit unit of the input temperature; The name input_unit indicates that it's the unit of our input temperature
+#' @param output_unit unit of the output temperature; The name output_unit indicates that it's the unit of our output temperature
+#' @return the converted temperature in the specified output unit
+
 temperature_conversion <- function(input_unit, output_unit, input_temp) {
   if (!((input_unit == "C") | (input_unit == "Celsius") | (input_unit == "K") | (input_unit == "Kelvin") | (input_unit == "F") | (input_unit == "Fahrenheit"))) {
     stop("Input unit invalid, must be one of Fahrenheit, Celsius, Kelvin or F, C, K")
@@ -33,23 +59,40 @@ temperature_conversion <- function(input_unit, output_unit, input_temp) {
 }
 ``` 
 
-Exercise 4: Testing
+Exercise 3: Include examples 
 ```{r}
-test_that("Different input vector types", {
+#' @examples
+#' temperature_conversion("Celsius", "Kelvin", 50)
+#' # Here we convert 50 degree Celsius into Kelvin. We need to input the input_unit "Celsius", the output_unit "Kelvin", and the temperature before conversion "50". The value returned from calling the function is thus our temperature in Kelvin.
+#' 
+#' temperature_conversion("K", "F", 50)
+#' # Here we convert 50 degree Kelvin into Fahrenheit. We need to input the input_unit "K" which is another valid input representing "Kelvin", the output_unit F representing "Fahrenheit", and the temperature before conversion "50". The value returned from calling the function is thus the temperature in Fahrenheit.
+#' 
+#' mutate(temp, Fahrenheit = temperature_conversion("C", "F", Celsius))
+# Here we take in a dataset with a column of temperature in Celsius, and convert each temperature into Fahrenheit using the temperature_conversion function. The result will have a new column containing each corresponding Fahrenheit temperature value.
+```
+
+
+Exercise 4: Test the Function
+```{r}
+test_that("Different input types", {
   expect_equal(temperature_conversion("Celsius", "Kelvin", 100), 373.15 , tolerance = 1e-4)
-  expect_equal(temperature_conversion("Kelvin", "Celsius", 273.15), 0, tolerance = 1e-4)
   expect_equal(temperature_conversion("F", "C", 50), 10, tolerance = 1e-4)
-  expect_equal(temperature_conversion("F", "Kelvin", 10), 260.928, tolerance = 1e-4)
   expect_equal(temperature_conversion("Kelvin", "F", 10), -441.67, tolerance = 1e-4)
+  
 })
 
-test_that("NA data vectors", {
+test_that("NA input data values", {
   expect_equal(temperature_conversion("Kelvin", "F", NA), NA_real_)
   
 })
 
-test_that("Invalid Input vectors", {
+test_that("Invalid input_unit or output_unit", {
   expect_error(temperature_conversion("Kelvin", "Cels", 10))
+})
+
+test_that("Operate on column variable of a dataset", {
+  expect_equal(mutate(tempC, Fahrenheit = temperature_conversion("C", "F", Celsius)), tempCF, tolerance = 1e-4)
 })
 
 ```
